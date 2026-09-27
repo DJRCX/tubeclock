@@ -6,55 +6,31 @@
   window.__tubeclock_injected = true;
 
   const DEFAULT_CONFIG = {
-    timeFormat: '12h',      // '12h' | '24h'
+    timeFormat: '12h',          // '12h' | '24h'
     showSeconds: true,
     showDate: false,
     blinkingColon: false,
-    theme: 'default',       // 'default' | 'cyan' | 'green' | 'amber' | 'red' | 'white'
-    fontStyle: 'modern'     // 'modern' | 'digital'
+    theme: 'default',           // 'default' | 'cyan' | 'green' | 'amber' | 'red' | 'white'
+    fontStyle: 'modern',        // 'modern' | 'digital'
+    fontSize: 'medium',         // 'normal' | 'medium' | 'large' | 'xlarge'
+    fullscreenClock: 'top-right' // 'top-right' | 'top-left' | 'off'
   };
 
   let currentConfig = { ...DEFAULT_CONFIG };
-  let clockContainer = null;
+
+  // Clock instances
+  let topbarClock = null;
+  let fsClock = null;
+
   let timerId = null;
   let syncTimeoutId = null;
 
-  // Cache element references inside the clock
-  let domRefs = {
-    inner: null,
-    date: null,
-    hours: null,
-    colon: null,
-    minutes: null,
-    secondsGroup: null,
-    colonSec: null,
-    seconds: null,
-    ampm: null
-  };
-
   /**
-   * Load user preferences from chrome storage
+   * Factory to construct clock DOM elements and cache references
    */
-  async function loadConfig() {
-    try {
-      const storage = chrome.storage.sync || chrome.storage.local;
-      const data = await storage.get(DEFAULT_CONFIG);
-      currentConfig = { ...DEFAULT_CONFIG, ...data };
-    } catch (err) {
-      console.warn('[TubeClock] Could not read preferences, using defaults:', err);
-    }
-    applyConfig();
-    updateClock();
-  }
-
-  /**
-   * Build the clock DOM structure
-   */
-  function createClockElement() {
+  function createClockInstance(id, isFullscreen = false) {
     const container = document.createElement('div');
-    container.id = 'tubeclock-container';
-    container.setAttribute('data-theme', currentConfig.theme);
-    container.setAttribute('data-font', currentConfig.fontStyle);
+    container.id = id;
 
     const inner = document.createElement('div');
     inner.className = 'tubeclock-inner';
@@ -101,60 +77,88 @@
     inner.appendChild(timeSpan);
     container.appendChild(inner);
 
-    domRefs = {
-      inner,
-      date: dateSpan,
-      hours: hoursSpan,
-      colon: colonSpan,
-      minutes: minutesSpan,
-      secondsGroup,
-      colonSec: colonSecSpan,
-      seconds: secondsSpan,
-      ampm: ampmSpan
+    return {
+      container,
+      refs: {
+        inner,
+        date: dateSpan,
+        hours: hoursSpan,
+        colon: colonSpan,
+        minutes: minutesSpan,
+        secondsGroup,
+        colonSec: colonSecSpan,
+        seconds: secondsSpan,
+        ampm: ampmSpan
+      }
     };
-
-    return container;
   }
 
   /**
-   * Apply configuration classes and attributes to DOM
+   * Load user preferences from chrome storage
+   */
+  async function loadConfig() {
+    try {
+      const storage = chrome.storage.sync || chrome.storage.local;
+      const data = await storage.get(DEFAULT_CONFIG);
+      currentConfig = { ...DEFAULT_CONFIG, ...data };
+    } catch (err) {
+      console.warn('[TubeClock] Could not read preferences, using defaults:', err);
+    }
+    applyConfig();
+    updateClock();
+  }
+
+  /**
+   * Apply settings (theme, font, size, format) to clock instances
    */
   function applyConfig() {
-    if (!clockContainer) return;
+    const instances = [
+      { inst: topbarClock, isFs: false },
+      { inst: fsClock, isFs: true }
+    ];
 
-    clockContainer.setAttribute('data-theme', currentConfig.theme);
-    clockContainer.setAttribute('data-font', currentConfig.fontStyle);
+    instances.forEach(({ inst, isFs }) => {
+      if (!inst || !inst.container) return;
 
-    if (currentConfig.blinkingColon) {
-      domRefs.inner.classList.add('tubeclock-blink');
-    } else {
-      domRefs.inner.classList.remove('tubeclock-blink');
-    }
+      const { container, refs } = inst;
+      container.setAttribute('data-theme', currentConfig.theme);
+      container.setAttribute('data-font', currentConfig.fontStyle);
+      container.setAttribute('data-size', currentConfig.fontSize);
 
-    domRefs.date.style.display = currentConfig.showDate ? 'inline-block' : 'none';
-    domRefs.secondsGroup.style.display = currentConfig.showSeconds ? 'inline-flex' : 'none';
-    domRefs.ampm.style.display = currentConfig.timeFormat === '12h' ? 'inline-block' : 'none';
+      if (isFs) {
+        container.setAttribute('data-position', currentConfig.fullscreenClock);
+        container.style.display = currentConfig.fullscreenClock === 'off' ? 'none' : '';
+      }
+
+      if (currentConfig.blinkingColon) {
+        refs.inner.classList.add('tubeclock-blink');
+      } else {
+        refs.inner.classList.remove('tubeclock-blink');
+      }
+
+      refs.date.style.display = currentConfig.showDate ? 'inline-block' : 'none';
+      refs.secondsGroup.style.display = currentConfig.showSeconds ? 'inline-flex' : 'none';
+      refs.ampm.style.display = currentConfig.timeFormat === '12h' ? 'inline-block' : 'none';
+    });
   }
 
   /**
-   * Update time display
+   * Update time display across all active clocks
    */
   function updateClock() {
-    if (!domRefs.hours) return;
-
     const now = new Date();
 
-    // Date display (e.g. "Sun, Sep 27")
+    // Date string
+    let dateStr = '';
     if (currentConfig.showDate) {
-      const dateStr = now.toLocaleDateString(undefined, {
+      dateStr = now.toLocaleDateString(undefined, {
         weekday: 'short',
         month: 'short',
         day: 'numeric'
       });
-      domRefs.date.textContent = dateStr;
     }
 
-    // Time calculation
+    // Time calculations
     let hours = now.getHours();
     let ampm = '';
 
@@ -162,30 +166,43 @@
       ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12;
       hours = hours ? hours : 12; // 0 hour is 12 AM
-      domRefs.ampm.textContent = ampm;
     }
 
     const hStr = currentConfig.timeFormat === '24h' 
       ? String(hours).padStart(2, '0') 
       : String(hours);
     const mStr = String(now.getMinutes()).padStart(2, '0');
+    const sStr = String(now.getSeconds()).padStart(2, '0');
 
-    if (domRefs.hours.textContent !== hStr) domRefs.hours.textContent = hStr;
-    if (domRefs.minutes.textContent !== mStr) domRefs.minutes.textContent = mStr;
-
-    if (currentConfig.showSeconds) {
-      const sStr = String(now.getSeconds()).padStart(2, '0');
-      if (domRefs.seconds.textContent !== sStr) domRefs.seconds.textContent = sStr;
-    }
-
-    // Tooltip with detailed date & time
-    const fullDate = now.toLocaleDateString(undefined, {
+    const fullTooltip = `${now.toLocaleDateString(undefined, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
+    })} • ${now.toLocaleTimeString()}`;
+
+    // Update both clocks
+    [topbarClock, fsClock].forEach(inst => {
+      if (!inst || !inst.refs || !inst.refs.hours) return;
+      const { refs } = inst;
+
+      if (currentConfig.showDate && refs.date.textContent !== dateStr) {
+        refs.date.textContent = dateStr;
+      }
+
+      if (refs.hours.textContent !== hStr) refs.hours.textContent = hStr;
+      if (refs.minutes.textContent !== mStr) refs.minutes.textContent = mStr;
+
+      if (currentConfig.showSeconds && refs.seconds.textContent !== sStr) {
+        refs.seconds.textContent = sStr;
+      }
+
+      if (currentConfig.timeFormat === '12h' && refs.ampm.textContent !== ampm) {
+        refs.ampm.textContent = ampm;
+      }
+
+      refs.inner.title = fullTooltip;
     });
-    domRefs.inner.title = `${fullDate} • ${now.toLocaleTimeString()}`;
   }
 
   /**
@@ -197,7 +214,6 @@
 
     updateClock();
 
-    // Align to the start of the next exact second
     const msToNextSecond = 1000 - (Date.now() % 1000);
     syncTimeoutId = setTimeout(() => {
       updateClock();
@@ -206,15 +222,13 @@
   }
 
   /**
-   * Find YouTube's logo renderer and insert the clock beside it
+   * Inject clock beside the YouTube masthead logo
    */
-  function injectClock() {
-    // Check if already in the DOM and still connected
-    if (clockContainer && clockContainer.isConnected) {
+  function injectTopbarClock() {
+    if (topbarClock && topbarClock.container.isConnected) {
       return true;
     }
 
-    // Attempt to locate YouTube logo element
     const logoRenderer = document.querySelector('ytd-topbar-logo-renderer#logo') ||
                          document.querySelector('ytd-topbar-logo-renderer') ||
                          document.querySelector('#start #logo') ||
@@ -222,28 +236,63 @@
 
     if (!logoRenderer) return false;
 
-    if (!clockContainer) {
-      clockContainer = createClockElement();
+    if (!topbarClock) {
+      topbarClock = createClockInstance('tubeclock-container', false);
       applyConfig();
-      startTicker();
     }
 
-    // Insert directly adjacent to the logo
-    logoRenderer.insertAdjacentElement('afterend', clockContainer);
+    logoRenderer.insertAdjacentElement('afterend', topbarClock.container);
     return true;
   }
 
   /**
-   * Initialize observer to maintain injection across YouTube SPA page switches
+   * Inject hoverable clock into the YouTube fullscreen video player
+   */
+  function injectFullscreenClock() {
+    if (currentConfig.fullscreenClock === 'off') return true;
+
+    if (fsClock && fsClock.container.isConnected) {
+      return true;
+    }
+
+    const player = document.querySelector('#movie_player') ||
+                   document.querySelector('.html5-video-player');
+
+    if (!player) return false;
+
+    if (!fsClock) {
+      fsClock = createClockInstance('tubeclock-fullscreen', true);
+      applyConfig();
+    }
+
+    player.appendChild(fsClock.container);
+    return true;
+  }
+
+  /**
+   * Attempt injection of both clocks
+   */
+  function injectAll() {
+    const topDone = injectTopbarClock();
+    const fsDone = injectFullscreenClock();
+    if (topDone || fsDone) {
+      startTicker();
+    }
+    return topDone && fsDone;
+  }
+
+  /**
+   * Initialize observer to maintain injection across YouTube navigation & hydration
    */
   function initObserver() {
-    if (injectClock()) return;
+    injectAll();
 
     const observer = new MutationObserver(() => {
-      if (injectClock()) {
-        // Disconnect once injected, but re-watch if masthead reloads
-        observer.disconnect();
-        watchMasthead();
+      const topConnected = topbarClock && topbarClock.container.isConnected;
+      const fsConnected = fsClock && fsClock.container.isConnected;
+
+      if (!topConnected || !fsConnected) {
+        injectAll();
       }
     });
 
@@ -253,32 +302,17 @@
     });
   }
 
-  /**
-   * Keep a lightweight observer on the masthead / start area to re-attach if YouTube removes it
-   */
-  function watchMasthead() {
-    const target = document.querySelector('#masthead') || document.querySelector('ytd-masthead') || document.body;
-    if (!target) return;
-
-    const mastheadObserver = new MutationObserver(() => {
-      if (!clockContainer || !clockContainer.isConnected) {
-        injectClock();
-      }
-    });
-
-    mastheadObserver.observe(target, {
-      childList: true,
-      subtree: true
-    });
-  }
-
   // Handle YouTube Single Page Navigation events
   ['yt-navigate-finish', 'yt-page-data-updated'].forEach(event => {
     window.addEventListener(event, () => {
-      if (!clockContainer || !clockContainer.isConnected) {
-        injectClock();
-      }
+      injectAll();
     });
+  });
+
+  // Handle Fullscreen events
+  document.addEventListener('fullscreenchange', () => {
+    injectFullscreenClock();
+    updateClock();
   });
 
   // Listen for preference changes from the popup

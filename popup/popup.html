@@ -23,7 +23,7 @@
     <section class="preview-section">
       <div class="preview-label">Live Preview</div>
       <div class="preview-box">
-        <div id="preview-clock" class="tubeclock-inner">
+        <div id="preview-clock" class="tubeclock-inner" data-size="medium">
           <span id="preview-date" class="tubeclock-date">Sun, Sep 27</span>
           <span class="tubeclock-time">
             <span id="preview-hours">10</span>
@@ -41,12 +41,36 @@
 
     <!-- Controls -->
     <section class="settings-group">
+      <!-- Font Size -->
+      <div class="setting-item format-item">
+        <span class="setting-label">Font Size</span>
+        <div class="segmented-control size-control">
+          <button type="button" class="segment-size-btn" data-size="normal">Normal</button>
+          <button type="button" class="segment-size-btn active" data-size="medium">Medium</button>
+          <button type="button" class="segment-size-btn" data-size="large">Large</button>
+          <button type="button" class="segment-size-btn" data-size="xlarge">XL</button>
+        </div>
+      </div>
+
       <!-- Time Format -->
       <div class="setting-item format-item">
         <span class="setting-label">Time Format</span>
         <div class="segmented-control">
           <button type="button" class="segment-btn active" data-format="12h">12-Hour</button>
           <button type="button" class="segment-btn" data-format="24h">24-Hour</button>
+        </div>
+      </div>
+
+      <!-- Fullscreen Clock -->
+      <div class="setting-item format-item">
+        <div class="setting-info">
+          <span class="setting-label">Fullscreen Video Clock</span>
+          <span class="setting-desc">Hoverable clock when video is fullscreen</span>
+        </div>
+        <div class="segmented-control">
+          <button type="button" class="segment-fs-btn active" data-fs="top-right">Top-Right</button>
+          <button type="button" class="segment-fs-btn" data-fs="top-left">Top-Left</button>
+          <button type="button" class="segment-fs-btn" data-fs="off">Off</button>
         </div>
       </div>
 

@@ -77,7 +77,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
+  min-height: 56px;
 }
 
 /* Replicating Clock styles in preview */
@@ -85,13 +85,29 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  border-radius: 14px;
-  font-size: 14px;
+  border-radius: 16px;
   font-weight: 500;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   transition: all 0.2s ease;
+}
+
+/* Preview Font Sizes */
+.tubeclock-inner[data-size="normal"] {
+  font-size: 14px;
+  padding: 3px 8px;
+}
+.tubeclock-inner[data-size="medium"] {
+  font-size: 16px;
+  padding: 4px 11px;
+}
+.tubeclock-inner[data-size="large"] {
+  font-size: 18px;
+  padding: 5px 13px;
+}
+.tubeclock-inner[data-size="xlarge"] {
+  font-size: 20px;
+  padding: 6px 15px;
 }
 
 .tubeclock-inner[data-font="modern"] {
@@ -140,8 +156,8 @@ body {
 }
 
 .tubeclock-date {
-  font-size: 11px;
-  opacity: 0.75;
+  font-size: 0.82em;
+  opacity: 0.78;
   padding-right: 5px;
   border-right: 1px solid currentColor;
 }
@@ -175,10 +191,10 @@ body {
 }
 
 .tubeclock-ampm {
-  font-size: 10px;
+  font-size: 0.75em;
   font-weight: 700;
   margin-left: 4px;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 /* Settings List */
@@ -234,21 +250,26 @@ body {
 }
 
 .segment-btn,
-.segment-font-btn {
+.segment-font-btn,
+.segment-size-btn,
+.segment-fs-btn {
   flex: 1;
   background: transparent;
   border: none;
   color: #888888;
-  padding: 6px 10px;
+  padding: 6px 6px;
   font-size: 12px;
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .segment-btn.active,
-.segment-font-btn.active {
+.segment-font-btn.active,
+.segment-size-btn.active,
+.segment-fs-btn.active {
   background-color: #333333;
   color: #ffffff;
   font-weight: 600;

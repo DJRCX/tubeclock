@@ -7,7 +7,9 @@
     showDate: false,
     blinkingColon: false,
     theme: 'default',
-    fontStyle: 'modern'
+    fontStyle: 'modern',
+    fontSize: 'medium',
+    fullscreenClock: 'top-right'
   };
 
   let config = { ...DEFAULT_CONFIG };
@@ -27,6 +29,8 @@
 
   const formatButtons = document.querySelectorAll('.segment-btn');
   const fontButtons = document.querySelectorAll('.segment-font-btn');
+  const sizeButtons = document.querySelectorAll('.segment-size-btn');
+  const fsButtons = document.querySelectorAll('.segment-fs-btn');
   const themeButtons = document.querySelectorAll('.theme-dot');
 
   const storage = chrome.storage.sync || chrome.storage.local;
@@ -56,6 +60,16 @@
       btn.classList.toggle('active', btn.dataset.font === config.fontStyle);
     });
 
+    // Font size buttons
+    sizeButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.size === config.fontSize);
+    });
+
+    // Fullscreen buttons
+    fsButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.fs === config.fullscreenClock);
+    });
+
     // Toggles
     toggleSeconds.checked = config.showSeconds;
     toggleDate.checked = config.showDate;
@@ -75,6 +89,7 @@
   function updatePreview() {
     previewClock.setAttribute('data-theme', config.theme);
     previewClock.setAttribute('data-font', config.fontStyle);
+    previewClock.setAttribute('data-size', config.fontSize);
 
     if (config.blinkingColon) {
       previewClock.classList.add('tubeclock-blink');
@@ -134,6 +149,24 @@
     fontButtons.forEach(btn => {
       btn.addEventListener('click', async () => {
         config.fontStyle = btn.dataset.font;
+        updateUI();
+        await saveConfig();
+      });
+    });
+
+    // Size selection
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        config.fontSize = btn.dataset.size;
+        updateUI();
+        await saveConfig();
+      });
+    });
+
+    // Fullscreen clock position selection
+    fsButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        config.fullscreenClock = btn.dataset.fs;
         updateUI();
         await saveConfig();
       });
