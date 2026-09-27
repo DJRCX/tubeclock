@@ -17,6 +17,8 @@ Never lose track of time while watching tutorials, podcasts, or videos again!
 - ⏱️ **Flexible Time Formats**: Toggle between **12-Hour** (with AM/PM) and **24-Hour** military time.
 - ⚡ **Real-Time Seconds**: Choose to show or hide the seconds counter (`:ss`).
 - 📅 **Date Display**: Optional date badge (e.g., `Sun, Sep 27`) right beside the time.
+- 🎬 **Fullscreen Video Clock**: When watching in fullscreen, a sleek frosted-glass clock overlays the video player. It auto-hides with playback controls and seamlessly reveals itself whenever you hover your cursor over it!
+- 🔍 **Adjustable Font Sizes**: Choose between **Normal (14px)**, **Medium (16px)**, **Large (18px)**, and **XL (20px)** for optimal viewing.
 - 🎨 **Color Themes**:
   - **Auto (YouTube Native)**: Matches YouTube's theme automatically.
   - **Neon Cyan**: Futuristic glowing cyan.
@@ -40,7 +42,7 @@ Since this extension is open-source and not distributed via the paid Chrome Web 
 1. **Download the Extension**:
    - Clone this repository:
      ```bash
-     git clone https://github.com/your-username/tubeclock.git
+     git clone https://github.com/DJRCX/tubeclock.git
      ```
    - *Or* download the latest `.zip` release, extract it to a folder on your computer.
 
