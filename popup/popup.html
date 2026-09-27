@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TubeClock Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <img src="../icons/icon-48.png" alt="TubeClock Logo" class="logo-icon">
+        <div>
+          <h1 class="title">TubeClock</h1>
+          <p class="subtitle">Digital Clock for YouTube™</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Live Preview Box -->
+    <section class="preview-section">
+      <div class="preview-label">Live Preview</div>
+      <div class="preview-box">
+        <div id="preview-clock" class="tubeclock-inner">
+          <span id="preview-date" class="tubeclock-date">Sun, Sep 27</span>
+          <span class="tubeclock-time">
+            <span id="preview-hours">10</span>
+            <span id="preview-colon" class="tubeclock-colon">:</span>
+            <span id="preview-minutes">05</span>
+            <span id="preview-sec-group" class="tubeclock-seconds-group">
+              <span id="preview-colon-sec" class="tubeclock-colon-sec">:</span>
+              <span id="preview-seconds">42</span>
+            </span>
+            <span id="preview-ampm" class="tubeclock-ampm">AM</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="settings-group">
+      <!-- Time Format -->
+      <div class="setting-item format-item">
+        <span class="setting-label">Time Format</span>
+        <div class="segmented-control">
+          <button type="button" class="segment-btn active" data-format="12h">12-Hour</button>
+          <button type="button" class="segment-btn" data-format="24h">24-Hour</button>
+        </div>
+      </div>
+
+      <!-- Show Seconds -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Show Seconds</span>
+          <span class="setting-desc">Display seconds counter (:ss)</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-seconds" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Show Date -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Show Date Badge</span>
+          <span class="setting-desc">Include weekday and date</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-date">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Blinking Colon -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Blinking Separator</span>
+          <span class="setting-desc">Pulse the colon every second</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-blinking">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Font Style -->
+      <div class="setting-item format-item">
+        <span class="setting-label">Font Style</span>
+        <div class="segmented-control">
+          <button type="button" class="segment-font-btn active" data-font="modern">Modern</button>
+          <button type="button" class="segment-font-btn" data-font="digital">Digital Mono</button>
+        </div>
+      </div>
+
+      <!-- Theme Colors -->
+      <div class="setting-item theme-item">
+        <div class="setting-info">
+          <span class="setting-label">Color Theme</span>
+        </div>
+        <div class="theme-palette">
+          <button type="button" class="theme-dot active" data-theme="default" title="YouTube Native">
+            <span class="dot-fill dot-default"></span>
+          </button>
+          <button type="button" class="theme-dot" data-theme="cyan" title="Neon Cyan">
+            <span class="dot-fill dot-cyan"></span>
+          </button>
+          <button type="button" class="theme-dot" data-theme="green" title="Emerald Green">
+            <span class="dot-fill dot-green"></span>
+          </button>
+          <button type="button" class="theme-dot" data-theme="amber" title="Warm Amber">
+            <span class="dot-fill dot-amber"></span>
+          </button>
+          <button type="button" class="theme-dot" data-theme="red" title="YouTube Red">
+            <span class="dot-fill dot-red"></span>
+          </button>
+          <button type="button" class="theme-dot" data-theme="white" title="Crisp White">
+            <span class="dot-fill dot-white"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Changes apply instantly to YouTube tabs</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

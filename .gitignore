@@ -1,0 +1,16 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Archives & Releases
+*.zip
+*.crx
+dist/
+build/
+
+# Node / Python cache
+__pycache__/
+*.py[cod]
+*$py.class
